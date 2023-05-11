@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb
+spec:
+  replicas: 1
+  serviceName: mongodb
+  selector:
+    matchLabels:
+      name: mongodb
+  template:
+    metadata:
+      labels:
+        name: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:4.2.1
+        command:
+        - sh
+        - -c
+        - "exec mongod -f /data/middleware-data/mongodb/conf/mongodb.conf"
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongosecret
+              key: username
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongosecret
+              key: password
+        ports:
+        - containerPort: 27017
+          name: mongodb
+          protocol: TCP
+        volumeMounts:
+        - name: mongodb-config
+          mountPath: /data/middleware-data/mongodb/conf/
+ #       - name: data
+ #         mountPath: /data/middleware-data/mongodb/
+      volumes:
+      - name: mongodb-config
+        configMap:
+          name: mongodb-conf
+#      - name: data
+ #       hostPath:
+#          path: /Users/37070/Desktop/mongo/data/
+
+
+ 
+
